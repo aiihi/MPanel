@@ -2,15 +2,15 @@ use rusqlite::Connection as SqliteConn;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
-/// Get the SQLite data directory: <config_dir>/leepanel
+/// Get the SQLite data directory: <config_dir>/mpanel
 pub fn db_dir() -> PathBuf {
     let mut path = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
-    path.push("leepanel");
+    path.push("mpanel");
     std::fs::create_dir_all(&path).ok();
     path
 }
 
-/// Get the SQLite database path: <config_dir>/leepanel/data.db
+/// Get the SQLite database path: <config_dir>/mpanel/data.db
 pub fn db_path() -> PathBuf {
     let mut path = db_dir();
     path.push("data.db");

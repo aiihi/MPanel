@@ -112,6 +112,35 @@ export default function Sidebar({ onSelect, onConnect, onNew, onCreateConnection
     }
   }
 
+  // Auto-connect the last-used server once, on first load
+  const didAutoConnect = useRef(false)
+  useEffect(() => {
+    if (didAutoConnect.current) return
+    const last = localStorage.getItem('mpanel_last_active')
+    if (last && connections.length > 0) {
+      const target = connections.find(c => c.id === last)
+      if (target) {
+        didAutoConnect.current = true
+        onConnect(target)
+      }
+    }
+  }, [connections, onConnect])
+
+  // Close any open modal/dialog with Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setContextMenu(null)
+        setLangDropdownOpen(false)
+        setConfirmDelete(null)
+        setEditing(null)
+        setCreating(null)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   const handleDelete = async (id: string) => {
     await invoke('config_delete', { id })
     setConfirmDelete(null)
@@ -217,14 +246,18 @@ export default function Sidebar({ onSelect, onConnect, onNew, onCreateConnection
       </div>
       <div className="connection-list">
         {connections.length === 0 && (
-          <p className="empty-hint">{t('sidebar.clickToAdd')}</p>
+          <div className="empty-state">
+            <div className="empty-icon">🖥️</div>
+            <div className="empty-sub">{t('sidebar.clickToAdd')}</div>
+            <button className="empty-cta" onClick={handleNewConnection}>{t('sidebar.newConnection')}</button>
+          </div>
         )}
         {connections.map((conn) => {
           const isConnected = connectedIds?.includes(conn.id) ?? false
           return (
             <div
               key={conn.id}
-              className={`connection-item${conn.id === activeConfigId ? ' active' : ''}`}
+              className={`connection-item${conn.id === activeConfigId ? ' active' : ''}${isConnected ? ' connected' : ''}`}
               onClick={() => onSelect(conn)}
               onDoubleClick={() => onConnect(conn)}
               onContextMenu={(e) => handleContextMenu(e, conn)}

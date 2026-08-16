@@ -1,12 +1,12 @@
-# LeePanel
+# MPanel
 
-<p align="center"><img src="public/app-icon.png" alt="LeePanel Logo" width="128" height="128"></p>
+<p align="center"><img src="public/app-icon.png" alt="MPanel Logo" width="128" height="128"></p>
 
 <p align="center">
-  <a href="https://github.com/gna1280072/LeePanel/stargazers"><img src="https://img.shields.io/github/stars/gna1280072/LeePanel?style=flat-square" alt="Stars"></a>
-  <a href="https://github.com/gna1280072/LeePanel/releases"><img src="https://img.shields.io/github/v/release/gna1280072/LeePanel?style=flat-square" alt="Release"></a>
-  <a href="https://github.com/gna1280072/LeePanel/releases"><img src="https://img.shields.io/github/downloads/gna1280072/LeePanel/total?style=flat-square" alt="Downloads"></a>
-  <a href="https://github.com/gna1280072/LeePanel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/gna1280072/LeePanel?style=flat-square" alt="License"></a>
+  <a href="https://github.com/aiihi/MPanel/stargazers"><img src="https://img.shields.io/github/stars/aiihi/MPanel?style=flat-square" alt="Stars"></a>
+  <a href="https://github.com/aiihi/MPanel/releases"><img src="https://img.shields.io/github/v/release/aiihi/MPanel?style=flat-square" alt="Release"></a>
+  <a href="https://github.com/aiihi/MPanel/releases"><img src="https://img.shields.io/github/downloads/aiihi/MPanel/total?style=flat-square" alt="Downloads"></a>
+  <a href="https://github.com/aiihi/MPanel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/aiihi/MPanel?style=flat-square" alt="License"></a>
   <a href="https://linux.do"><img src="https://img.shields.io/badge/Linux%20DO-%E7%A4%BE%E5%8C%BA-30363D?style=flat-square&logo=linux" alt="Linux DO"></a>
 </p>
 
@@ -19,13 +19,13 @@
   <img src="https://img.shields.io/badge/Server-Ubuntu%20%7C%20Debian-E95420?style=flat-square&logo=ubuntu" alt="Server">
 </p>
 
-[English](README.md) | [📥 下载软件](https://github.com/gna1280072/LeePanel/releases)
+[English](README.md) | [📥 下载软件](https://github.com/aiihi/MPanel/releases)
 
-LeePanel — 免费开源，下一代 Linux 服务器管理面板软件。
+MPanel — 免费开源，下一代 Linux 服务器管理面板软件。
 
 传统 Linux/VPS 管理面板频繁曝出安全漏洞，令服务器管理员苦不堪言。
 
-**LeePanel 为此而生。**
+**MPanel 为此而生。**
 
 > 🛡️ **零服务端代码** — 所有操作均通过本地 SSH 命令完成，服务器上**不安装**任何面板代码，**不暴露**多余端口，从根源消除面板自身的安全风险。
 
@@ -37,14 +37,14 @@ LeePanel — 免费开源，下一代 Linux 服务器管理面板软件。
 
 安装包最小仅 **6 MB** 起，灵活小巧！彻底取代传统浏览器面板。
 
-使用过程中如有任何建议或意见，欢迎前往 [GitHub Discussions](https://github.com/gna1280072/LeePanel/discussions) 交流反馈。
+使用过程中如有任何建议或意见，欢迎前往 [GitHub Discussions](https://github.com/aiihi/MPanel/discussions) 交流反馈。
 
-🌐 官网: https://www.LeePanel.com
+🌐 官网: https://www.MPanel.com
 
 
-## 💡 为什么选择 LeePanel？
+## 💡 为什么选择 MPanel？
 
-| 维度 | 传统 Web 面板 ❌ | LeePanel ✅ |
+| 维度 | 传统 Web 面板 ❌ | MPanel ✅ |
 |------|------------------|-------------|
 | 部署方式 | 在服务器上安装运行面板代码，占用资源 | 完全在您的桌面端运行，不在服务器上安装 |
 | 端口暴露 | 向互联网开放 8888/8080 端口 | 仅使用您已有的 SSH 端口 |
@@ -73,12 +73,12 @@ LeePanel — 免费开源，下一代 Linux 服务器管理面板软件。
 
 | 平台 | 下载 |
 |------|------|
-| Windows | [下载 Windows 版](https://github.com/gna1280072/LeePanel/releases) |
-| macOS | [下载 macOS 版](https://github.com/gna1280072/LeePanel/releases) |
-| Linux | [下载 Linux 版](https://github.com/gna1280072/LeePanel/releases) |
+| Windows | [下载 Windows 版](https://github.com/aiihi/MPanel/releases) |
+| macOS | [下载 macOS 版](https://github.com/aiihi/MPanel/releases) |
+| Linux | [下载 Linux 版](https://github.com/aiihi/MPanel/releases) |
 
 <p align="center">
-  <a href="https://github.com/gna1280072/LeePanel/releases">
+  <a href="https://github.com/aiihi/MPanel/releases">
     <img src="https://img.shields.io/badge/下载-最新版本-2da44e?style=for-the-badge&logo=github" alt="下载最新版">
   </a>
 </p>

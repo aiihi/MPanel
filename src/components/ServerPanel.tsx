@@ -199,7 +199,7 @@ export default function ServerPanel({ sessionId, connHost, connUsername, initial
             key={item.key}
             className={`sp-nav-item ${activeSection === item.key ? 'active' : ''}`}
             onClick={() => {
-              if (item.key === 'discussions') { open('https://github.com/gna1280072/LeePanel/discussions'); return }
+              if (item.key === 'discussions') { open('https://github.com/aiihi/MPanel/discussions'); return }
               // ponytail: no session → toast hint instead of disabling nav items
               if (!sessionId) { onShowToast?.(`⚠ ${t('common.connectFirst')}`); return }
               setActiveSection(item.key)

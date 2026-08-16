@@ -17,7 +17,7 @@ use aes_gcm::{
 use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use std::sync::OnceLock;
 
-const SERVICE: &str = "LeePanel";
+const SERVICE: &str = "MPanel";
 const KEY_ENTRY: &str = "db-encryption-key";
 const PREFIX: &str = "enc::";
 
@@ -59,7 +59,7 @@ fn write_key_file(path: &std::path::Path, contents: &str) {
 
 fn fallback_key() -> Vec<u8> {
     let dir = crate::db::db_dir();
-    let path = dir.join("leepanel.key");
+    let path = dir.join("mpanel.key");
     if let Ok(s) = std::fs::read_to_string(&path) {
         if let Ok(k) = B64.decode(s.trim()) {
             if k.len() == 32 {

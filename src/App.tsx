@@ -86,6 +86,23 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', settings.theme || 'dark')
   }, [settings.theme])
+
+  // Remember the last active server across app reloads
+  useEffect(() => {
+    if (activeConfigId) localStorage.setItem('mpanel_last_active', activeConfigId)
+  }, [activeConfigId])
+
+  // Global Escape closes the error / welcome dialogs
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (errorDialog) setErrorDialog(null)
+        if (showWelcome) setShowWelcome(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [errorDialog, showWelcome])
   // ponytail: per-session reconnect state — each server reconnects independently
   // ponytail: Map value stores { name, attempt } so the reconnect bar renders without toast flicker
   const [reconnectingSessions, setReconnectingSessions] = useState<Map<string, { name: string; attempt: number }>>(new Map())

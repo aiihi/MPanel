@@ -140,7 +140,7 @@ impl Handler for SshHandler {
             Ok(()) => Ok(true),
             Err(e) => {
                 // Host key mismatch → possible MITM. Refuse the connection.
-                eprintln!("[LeePanel] SSH host key mismatch (possible MITM): {}", e);
+                eprintln!("[MPanel] SSH host key mismatch (possible MITM): {}", e);
                 Err(russh::Error::KeyChanged { line: 0 })
             }
         }
@@ -1556,7 +1556,7 @@ pub async fn session_stream_file_to_local(session: &SshSession, remote_path: &st
 }
 
 pub async fn session_download_to_local(session: &SshSession, remote_path: &str, file_name: &str, app_handle: &AppHandle, session_id: &str) -> Result<String, String> {
-    let temp_dir = std::env::temp_dir().join("leepanel-preview");
+    let temp_dir = std::env::temp_dir().join("mpanel-preview");
     std::fs::create_dir_all(&temp_dir).map_err(|e| format!("Failed to create temp dir: {}", e))?;
     let local_path = temp_dir.join(file_name);
     let local_str = local_path.to_string_lossy().to_string();
