@@ -279,7 +279,7 @@ impl DbCredentialsManager {
                 Ok(DbCredential {
                     db_name: row.get(0)?,
                     db_user: row.get::<_, String>(1).unwrap_or_default(),
-                    password: row.get(2)?,
+                    password: crate::crypto::decrypt(&row.get::<_, String>(2)?),
                     access_type: row.get(3)?,
                     allowed_ip: row.get(4)?,
                 })
@@ -296,7 +296,7 @@ impl DbCredentialsManager {
             Ok(DbCredential {
                 db_name: row.get(0)?,
                 db_user: row.get::<_, String>(1).unwrap_or_default(),
-                password: row.get(2)?,
+                password: crate::crypto::decrypt(&row.get::<_, String>(2)?),
                 access_type: row.get(3)?,
                 allowed_ip: row.get(4)?,
             })
@@ -326,13 +326,13 @@ impl DbCredentialsManager {
         if exists {
             conn.execute(
                 "UPDATE db_credentials SET password = ?3 WHERE server_host = ?1 AND db_name = ?2",
-                rusqlite::params![server_host, db_name, password],
+                rusqlite::params![server_host, db_name, crate::crypto::encrypt(password)],
             ).map_err(|e| format!("Failed to update password: {}", e))?;
         } else if !password.is_empty() {
             // Create new record with defaults if password is not empty
             conn.execute(
                 "INSERT INTO db_credentials (server_host, db_name, db_user, password, access_type, allowed_ip) VALUES (?1, ?2, ?2, ?3, 'local', '')",
-                rusqlite::params![server_host, db_name, password],
+                rusqlite::params![server_host, db_name, crate::crypto::encrypt(password)],
             ).map_err(|e| format!("Failed to insert password: {}", e))?;
         }
         Ok(())

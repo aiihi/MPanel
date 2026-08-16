@@ -25,6 +25,8 @@ russh = "0.45"
 russh-keys = "0.45"
 russh-sftp = "2"
 base64 = "0.22"
+keyring = "3"
+aes-gcm = "0.10"
 async-trait = "0.1"
 tokio = { version = "1", features = ["rt", "macros", "sync", "time", "io-util"] }
 uuid = { version = "1", features = ["v4"] }

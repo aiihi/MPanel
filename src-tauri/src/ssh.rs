@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::io::Cursor;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -9,6 +10,7 @@ use tauri::{AppHandle, Emitter, Manager};
 use tokio::sync::{mpsc, Mutex};
 
 use crate::tunnel::TunnelManager;
+use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 
 // ===== SSH Response Cache =====
 
@@ -74,10 +76,55 @@ pub struct ForwardedTcpip {
     pub channel: russh::Channel<russh::client::Msg>,
 }
 
+// ===== SSH known_hosts (host key pinning) =====
+
+pub struct KnownHosts {
+    path: PathBuf,
+    map: std::sync::Mutex<HashMap<String, String>>,
+}
+
+impl KnownHosts {
+    pub fn new() -> Self {
+        let dir = crate::db::db_dir();
+        let path = dir.join("known_hosts.json");
+        let map = std::fs::read_to_string(&path)
+            .ok()
+            .and_then(|s| serde_json::from_str::<HashMap<String, String>>(&s).ok())
+            .unwrap_or_default();
+        Self { path, map: std::sync::Mutex::new(map) }
+    }
+
+    pub fn verify_or_record(&self, host: &str, port: u16, fingerprint: &str) -> Result<(), String> {
+        let key = format!("{}:{}", host, port);
+        let mut map = self.map.lock().unwrap();
+        match map.get(&key) {
+            Some(existing) if existing == fingerprint => Ok(()),
+            Some(existing) => Err(format!(
+                "REMOTE HOST IDENTIFICATION HAS CHANGED for {}:{}!\nExpected: {}\nReceived: {}\nThis may indicate a MAN-IN-THE-MIDDLE attack. Refusing to connect.",
+                host, port, existing, fingerprint
+            )),
+            None => {
+                map.insert(key, fingerprint.to_string());
+                let snapshot = map.clone();
+                drop(map);
+                if let Ok(json) = serde_json::to_string_pretty(&snapshot) {
+                    let _ = std::fs::write(&self.path, json);
+                }
+                Ok(())
+            }
+        }
+    }
+}
+
 pub struct SshHandler {
     /// Remote-forward registrations: server listen port -> tunnel receiver.
     /// The server names the port in server_channel_open_forwarded_tcpip.
     pub forwarded_reg: Arc<std::sync::Mutex<HashMap<u32, mpsc::UnboundedSender<ForwardedTcpip>>>>,
+    /// Target host/port for known_hosts verification.
+    pub host: String,
+    pub port: u16,
+    /// Pinned host keys (known_hosts semantics).
+    pub known_hosts: Arc<KnownHosts>,
 }
 
 #[async_trait]
@@ -86,9 +133,17 @@ impl Handler for SshHandler {
 
     async fn check_server_key(
         &mut self,
-        _server_public_key: &russh_keys::key::PublicKey,
+        server_public_key: &russh_keys::key::PublicKey,
     ) -> Result<bool, Self::Error> {
-        Ok(true)
+        let fingerprint = B64.encode(server_public_key.public_key_bytes());
+        match self.known_hosts.verify_or_record(&self.host, self.port, &fingerprint) {
+            Ok(()) => Ok(true),
+            Err(e) => {
+                // Host key mismatch → possible MITM. Refuse the connection.
+                eprintln!("[LeePanel] SSH host key mismatch (possible MITM): {}", e);
+                Err(russh::Error::KeyChanged { line: 0 })
+            }
+        }
     }
 
     /// Remote forwarding: the server opens a channel for a new incoming connection.
@@ -211,6 +266,9 @@ impl SshManager {
     ) -> Result<SshSession, String> {
         let handler = SshHandler {
             forwarded_reg: Arc::new(std::sync::Mutex::new(HashMap::new())),
+            host: host.clone(),
+            port,
+            known_hosts: Arc::new(KnownHosts::new()),
         };
         let forwarded_reg = handler.forwarded_reg.clone();
         let mut ssh_config = client::Config::default();

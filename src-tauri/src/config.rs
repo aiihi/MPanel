@@ -36,7 +36,7 @@ impl ConfigManager {
                 username: row.get(4)?,
                 auth_type: row.get(5)?,
                 key_path: row.get(6)?,
-                password: row.get(7)?,
+                password: row.get::<_, Option<String>>(7)?.map(|p| crate::crypto::decrypt(&p)),
                 remember_me: row.get::<_, Option<i64>>(8)?.map(|v| v == 1).unwrap_or(false),
             })
         })
@@ -46,9 +46,10 @@ impl ConfigManager {
     }
 
     pub fn save(conn: &SqliteConn, c: &Connection) -> Result<(), String> {
+        let password = c.password.as_ref().map(|p| crate::crypto::encrypt(p));
         conn.execute(
             "INSERT OR REPLACE INTO connections (id, name, host, port, username, auth_type, key_path, password, remember_me) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
-            params![c.id, c.name, c.host, c.port as i64, c.username, c.auth_type, c.key_path, c.password, if c.remember_me { 1 } else { 0 }],
+            params![c.id, c.name, c.host, c.port as i64, c.username, c.auth_type, c.key_path, password, if c.remember_me { 1 } else { 0 }],
         ).map_err(|e| format!("Save connection failed: {}", e))?;
         Ok(())
     }
@@ -68,57 +69,12 @@ impl ConfigManager {
         password: Option<&str>,
         remember_me: bool,
     ) -> Result<(), String> {
-        println!("=== DEBUG save_credentials ===");
-        println!("id: {}", id);
-        println!("username: {}", username);
-        println!("auth_type: {}", auth_type);
-        println!("key_path: {:?}", key_path);
-        println!("password: {:?}", password.as_ref().map(|_| "***"));
-        println!("remember_me: {}", remember_me);
-        
-        let sql = "UPDATE connections SET username = ?1, auth_type = ?2, key_path = ?3, password = ?4, remember_me = ?5 WHERE id = ?6";
-        println!("SQL: {}", sql);
-        
-        let result = conn.execute(
-            sql,
-            params![username, auth_type, key_path, password, if remember_me { 1 } else { 0 }, id],
-        );
-        
-        match result {
-            Ok(rows_affected) => {
-                println!("Rows affected: {}", rows_affected);
-                
-                // Verify the update by reading back
-                let mut stmt = conn.prepare("SELECT username, auth_type, key_path, password, remember_me FROM connections WHERE id = ?1")
-                    .map_err(|e| format!("Prepare select failed: {}", e))?;
-                
-                let row_result = stmt.query_row(params![id], |row| {
-                    Ok((
-                        row.get::<_, String>(0)?,
-                        row.get::<_, String>(1)?,
-                        row.get::<_, Option<String>>(2)?,
-                        row.get::<_, Option<String>>(3)?,
-                        row.get::<_, i64>(4)? == 1,
-                    ))
-                });
-                
-                match row_result {
-                    Ok((db_username, db_auth_type, db_key_path, db_password, db_remember)) => {
-                        println!("After update - username: {}, auth_type: {}, key_path: {:?}, password: {:?}, remember_me: {}",
-                            db_username, db_auth_type, db_key_path, db_password.as_ref().map(|_| "***"), db_remember);
-                    }
-                    Err(e) => {
-                        println!("Failed to verify update: {}", e);
-                    }
-                }
-                
-                Ok(())
-            }
-            Err(e) => {
-                println!("Error executing UPDATE: {}", e);
-                Err(format!("Save credentials failed: {}", e))
-            }
-        }
+        let enc_password = password.map(|p| crate::crypto::encrypt(p));
+        conn.execute(
+            "UPDATE connections SET username = ?1, auth_type = ?2, key_path = ?3, password = ?4, remember_me = ?5 WHERE id = ?6",
+            params![username, auth_type, key_path, enc_password, if remember_me { 1 } else { 0 }, id],
+        ).map_err(|e| format!("Save credentials failed: {}", e))?;
+        Ok(())
     }
 }
 
